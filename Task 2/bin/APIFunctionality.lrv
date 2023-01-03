@@ -1,0 +1,52 @@
+IMPORTS{
+import main.RunningTestOne;
+}
+  
+  
+GLOBAL {
+	VARIABLES {
+		int alertCounter = 0;
+	}
+	 
+	EVENTS {
+		uploadCorrAlert() = {*.uploadCorrAlert()}
+		uploadIncAlert() = {*.uploadIncAlert()}
+		purge() = {*.purge()}
+	}
+	
+	PROPERTY apiFunctionalityProperty {
+		STATES { 
+			BAD {
+				apiHasBadStatus
+			}
+			NORMAL {
+				alertsHaveBeenUploaded 
+				alertsHaveBeenPurged
+			}
+			STARTING {
+				apiHasBeenInitialised
+			}
+		}  
+		
+		TRANSITIONS {
+			apiHasBeenInitialised -> alertsHaveBeenUploaded [uploadCorrAlert\alertCounter < 5\alertCounter++;]
+			apiHasBeenInitialised -> alertsHaveBeenPurged [purge\\alertCounter = 0;]
+			apiHasBeenInitialised -> apiHasBadStatus [uploadIncAlert\\alertCounter++;]
+			
+			alertsHaveBeenPurged -> alertsHaveBeenPurged [purge\\alertCounter = 0;]
+			alertsHaveBeenPurged -> apiHasBadStatus [uploadIncAlert\\alertCounter++;]
+			alertsHaveBeenPurged -> alertsHaveBeenUploaded [uploadCorrAlert\alertCounter == 0\alertCounter++;]
+			
+			alertsHaveBeenUploaded -> alertsHaveBeenUploaded [uploadCorrAlert\alertCounter < 5\alertCounter++;]
+			alertsHaveBeenUploaded -> alertsHaveBeenPurged [purge\\alertCounter = 0;]
+			alertsHaveBeenUploaded -> apiHasBadStatus [uploadIncAlert\\alertCounter++;]
+			alertsHaveBeenUploaded -> apiHasBadStatus [uploadCorrAlert\alertCounter == 5\alertCounter++;]
+			
+			apiHasBadStatus -> apiHasBadStatus [uploadCorrAlert\alertCounter >= 5\alertCounter++;]
+			apiHasBadStatus -> apiHasBadStatus [uploadIncAlert\\alertCounter++;]
+			apiHasBadStatus -> alertsHaveBeenPurged [purge\\alertCounter = 0;]
+			
+			
+		}
+	}
+}

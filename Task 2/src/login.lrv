@@ -1,0 +1,45 @@
+IMPORTS{
+import main.RunningTestTwo;
+} 
+  
+  
+GLOBAL {
+	VARIABLES {
+		boolean loggedIn = false;
+		boolean alertsBeingViewed = false;
+	}  
+	 
+	EVENTS {
+		badLogin() = {*.badLogin()}
+		logOut() = {*.logOut()}
+		goodLogin() = {*.goodLogin()}
+		viewAlerts() = {*.viewAlerts()}
+	} 
+	
+	PROPERTY apiFunctionalityProperty {
+		STATES {
+			BAD {
+				apiHasBadStatus
+			}
+			NORMAL {
+				viewingAlerts
+				loggedIn
+			}
+			STARTING {
+				loggedOut
+			}
+		}
+		
+		TRANSITIONS {
+			loggedOut -> loggedOut [badLogin\loggedIn == false\loggedIn = false;]
+			loggedOut -> loggedIn [goodLogin\loggedIn == false\loggedIn = true;]
+			loggedIn -> loggedOut [logOut\loggedIn == true\loggedIn = false;]
+			loggedIn -> viewingAlerts [viewAlerts\loggedIn == true\alertsBeingViewed = false;]
+			viewingAlerts -> loggedOut [logOut\loggedIn == true\loggedIn = false;]
+			loggedOut -> apiHasBadStatus [viewAlerts\loggedIn == false\alertsBeingViewed = true;]
+			
+			
+			
+		}
+	}
+}
